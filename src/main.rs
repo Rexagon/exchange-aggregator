@@ -17,10 +17,7 @@ use {
     tokio::time::{self, Instant},
 };
 
-use crate::{
-    exchanges::{Binance, Exmo, HitBtc, LiveCoin, Yobit},
-    prelude::*,
-};
+use crate::{exchanges::*, prelude::*};
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
@@ -41,6 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ("EXMO", Box::new(Exmo::new(&settings))),
         ("HitBTC", Box::new(HitBtc::new(&settings))),
         ("Livecoin", Box::new(LiveCoin::new(&settings))),
+        ("Polonex", Box::new(Polonex::new(&settings))),
         ("YoBit", Box::new(Yobit::new(&settings))),
     ];
     let exchange_count = exchanges.len();
