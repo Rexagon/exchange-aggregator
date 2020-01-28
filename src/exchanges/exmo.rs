@@ -24,8 +24,8 @@ impl<'a> Exchange for Exmo<'a> {
 
         let mut result = HashMap::new();
 
-        for item in &self.pairs.items {
-            let ticker = match response.get_mut(&item.symbol) {
+        for (symbol, item) in &self.pairs.items {
+            let ticker = match response.get_mut(symbol) {
                 Some(ticker) => ticker,
                 None => continue,
             };

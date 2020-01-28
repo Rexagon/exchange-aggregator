@@ -1,3 +1,5 @@
+use hashbrown::HashMap;
+
 #[derive(Debug, Serialize)]
 pub struct Ticker {
     pub ask: Option<String>,
@@ -18,7 +20,7 @@ impl ToString for CurrencyPair {
 }
 
 pub struct CurrencyPairList<'a> {
-    pub items: Vec<CurrencyPairListItem<'a>>,
+    pub items: HashMap<String, CurrencyPairListItem<'a>>,
 }
 
 impl<'a> CurrencyPairList<'a> {
@@ -28,10 +30,14 @@ impl<'a> CurrencyPairList<'a> {
     {
         let items = currency_pairs
             .iter()
-            .map(|pair| CurrencyPairListItem {
-                pair,
-                symbol: symbol_predicate(pair),
-                is_active: true,
+            .map(|pair| {
+                (
+                    symbol_predicate(pair),
+                    CurrencyPairListItem {
+                        pair,
+                        is_active: true,
+                    },
+                )
             })
             .collect();
 
@@ -39,18 +45,11 @@ impl<'a> CurrencyPairList<'a> {
     }
 
     pub fn find(&self, symbol: &String) -> Option<&CurrencyPair> {
-        self.items.iter().find_map(|item| {
-            if item.symbol == *symbol {
-                Some(item.pair)
-            } else {
-                None
-            }
-        })
+        self.items.get(symbol).map(|item| item.pair)
     }
 }
 
 pub struct CurrencyPairListItem<'a> {
     pub pair: &'a CurrencyPair,
-    pub symbol: String,
     pub is_active: bool,
 }
