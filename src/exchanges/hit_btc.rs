@@ -1,9 +1,9 @@
-use hashbrown::HashMap;
-use std::error::Error;
-use std::pin::Pin;
+use {hashbrown::HashMap, std::error::Error};
 
-use crate::exchanges::{CurrencyPairList, Exchange, Ticker};
-use crate::Settings;
+use crate::{
+    exchanges::{CurrencyPairList, Exchange, Ticker},
+    Settings,
+};
 
 pub struct HitBtc<'a> {
     pairs: CurrencyPairList<'a>,
@@ -21,7 +21,7 @@ impl<'a> HitBtc<'a> {
 
 #[async_trait]
 impl<'a> Exchange for HitBtc<'a> {
-    async fn request_tickers(&self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
+    async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
         let response: Vec<TickersResponseItem> =
             reqwest::get(TICKERS_ENDPOINT).await?.json().await?;
 
@@ -34,7 +34,7 @@ impl<'a> Exchange for HitBtc<'a> {
             };
 
             result.insert(
-                ticker.symbol,
+                pair.to_string(),
                 Ticker {
                     ask: ticker.ask.take(),
                     bid: ticker.bid.take(),

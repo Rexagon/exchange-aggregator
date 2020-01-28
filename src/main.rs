@@ -6,12 +6,21 @@ extern crate async_trait;
 
 mod exchanges;
 
-use std::collections::HashMap;
 use std::time::Duration;
-use tokio::prelude::*;
 use tokio::time::{self, Instant};
 
-use crate::exchanges::{CurrencyPair, Exchange, Exchanges, HitBtc};
+use crate::exchanges::{CurrencyPair, Exchange, ExchangeSettings, HitBtc, Yobit};
+
+#[derive(Debug, Deserialize)]
+pub struct Exchanges {
+    pub hit_btc: Option<ExchangeSettings>,
+    pub yobit: Option<ExchangeSettings>,
+    pub live_coin: Option<ExchangeSettings>,
+    pub exmo: Option<ExchangeSettings>,
+    pub binance: Option<ExchangeSettings>,
+    pub polonex: Option<ExchangeSettings>,
+    pub gate_io: Option<ExchangeSettings>,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
@@ -28,7 +37,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let settings = settings.try_into::<Settings>()?;
 
-    let hit_btc = HitBtc::new(&settings);
+    let mut hit_btc = HitBtc::new(&settings);
+    let mut yobit: Yobit = Yobit::new(&settings);
 
     loop {
         let now = Instant::now();
@@ -36,6 +46,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let result = hit_btc.request_tickers().await;
         println!("HitBtc: {:?}", result);
+
+        let result = yobit.request_tickers().await;
+        println!("Yobit: {:?}", result);
 
         time::delay_until(now + Duration::from_secs(1)).await
     }
