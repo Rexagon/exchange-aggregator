@@ -14,7 +14,7 @@ use {
 };
 
 use crate::exchanges::{
-    CurrencyPair, Exchange, ExchangeSettings, Exmo, HitBtc, LiveCoin, Ticker, Yobit,
+    Binance, CurrencyPair, Exchange, ExchangeSettings, Exmo, HitBtc, LiveCoin, Ticker, Yobit,
 };
 
 #[derive(Debug, Deserialize)]
@@ -44,6 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let settings = settings.try_into::<Settings>()?;
 
     let mut exchanges: Vec<(&str, Box<dyn Exchange>)> = vec![
+        ("Binance", Box::new(Binance::new(&settings))),
         ("EXMO", Box::new(Exmo::new(&settings))),
         ("HitBTC", Box::new(HitBtc::new(&settings))),
         ("Livecoin", Box::new(LiveCoin::new(&settings))),
