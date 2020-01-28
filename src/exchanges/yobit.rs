@@ -4,9 +4,8 @@ use {
     std::error::Error,
 };
 
-use crate::exchanges::CurrencyPair;
 use crate::{
-    exchanges::{Exchange, Ticker},
+    exchanges::{CurrencyPair, Exchange, Ticker},
     Settings,
 };
 

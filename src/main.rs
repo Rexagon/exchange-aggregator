@@ -6,10 +6,16 @@ extern crate async_trait;
 
 mod exchanges;
 
-use std::time::Duration;
-use tokio::time::{self, Instant};
+use {
+    futures::{stream, StreamExt},
+    hashbrown::HashMap,
+    std::time::Duration,
+    tokio::time::{self, Instant},
+};
 
-use crate::exchanges::{CurrencyPair, Exchange, ExchangeSettings, Exmo, HitBtc, LiveCoin, Yobit};
+use crate::exchanges::{
+    CurrencyPair, Exchange, ExchangeSettings, Exmo, HitBtc, LiveCoin, Ticker, Yobit,
+};
 
 #[derive(Debug, Deserialize)]
 pub struct Exchanges {
@@ -37,26 +43,41 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let settings = settings.try_into::<Settings>()?;
 
-    let mut exmo = Exmo::new(&settings);
-    let mut hit_btc = HitBtc::new(&settings);
-    let mut live_coin = LiveCoin::new(&settings);
-    let mut yobit: Yobit = Yobit::new(&settings);
+    let mut exchanges: Vec<(&str, Box<dyn Exchange>)> = vec![
+        ("EXMO", Box::new(Exmo::new(&settings))),
+        ("HitBTC", Box::new(HitBtc::new(&settings))),
+        ("Livecoin", Box::new(LiveCoin::new(&settings))),
+        ("YoBit", Box::new(Yobit::new(&settings))),
+    ];
+    let exchange_count = exchanges.len();
 
     loop {
         let now = Instant::now();
         println!("Tick");
 
-        let result = exmo.request_tickers().await;
-        println!("Exmo: {:?}", result);
+        let tickers = stream::iter(exchanges.iter_mut().map(|(name, exchange)| {
+            async move {
+                let tickers = exchange.request_tickers().await;
+                tickers.map(|data| (*name, data))
+            }
+        }))
+        .fold(
+            Vec::<(&str, HashMap<String, Ticker>)>::with_capacity(exchange_count),
+            |mut result, fut| {
+                async {
+                    result.extend(fut.await);
+                    result
+                }
+            },
+        )
+        .await;
 
-        let result = hit_btc.request_tickers().await;
-        println!("HitBtc: {:?}", result);
+        let mut result = HashMap::new();
+        for (name, tickers) in tickers {
+            result.insert(name, tickers);
+        }
 
-        let result = live_coin.request_tickers().await;
-        println!("LiveCoin: {:?}", result);
-
-        let result = yobit.request_tickers().await;
-        println!("Yobit: {:?}", result);
+        println!("{:?}", result);
 
         time::delay_until(now + Duration::from_secs(1)).await
     }
