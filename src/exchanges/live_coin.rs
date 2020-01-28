@@ -1,9 +1,6 @@
 use {hashbrown::HashMap, std::error::Error};
 
-use crate::{
-    exchanges::{CurrencyPairList, Exchange, Ticker},
-    Settings,
-};
+use crate::{prelude::*, Exchange, Settings};
 
 pub struct LiveCoin<'a> {
     pairs: CurrencyPairList<'a>,

@@ -1,10 +1,6 @@
-use {hashbrown::HashMap, std::error::Error};
+use {futures::TryFutureExt, hashbrown::HashMap, std::error::Error};
 
-use crate::{
-    exchanges::{CurrencyPairList, Exchange, Ticker},
-    Settings,
-};
-use futures::TryFutureExt;
+use crate::{prelude::*, Exchange, Settings};
 
 pub struct Binance<'a> {
     pairs: CurrencyPairList<'a>,

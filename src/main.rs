@@ -4,7 +4,11 @@ extern crate serde_derive;
 #[macro_use]
 extern crate async_trait;
 
+mod exchange;
 mod exchanges;
+mod prelude;
+
+pub use exchange::*;
 
 use {
     futures::{stream, StreamExt},
@@ -13,25 +17,14 @@ use {
     tokio::time::{self, Instant},
 };
 
-use crate::exchanges::{
-    Binance, CurrencyPair, Exchange, ExchangeSettings, Exmo, HitBtc, LiveCoin, Ticker, Yobit,
+use crate::{
+    exchanges::{Binance, Exmo, HitBtc, LiveCoin, Yobit},
+    prelude::*,
 };
-
-#[derive(Debug, Deserialize)]
-pub struct Exchanges {
-    pub hit_btc: Option<ExchangeSettings>,
-    pub yobit: Option<ExchangeSettings>,
-    pub live_coin: Option<ExchangeSettings>,
-    pub exmo: Option<ExchangeSettings>,
-    pub binance: Option<ExchangeSettings>,
-    pub polonex: Option<ExchangeSettings>,
-    pub gate_io: Option<ExchangeSettings>,
-}
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub currency_pairs: Vec<CurrencyPair>,
-    pub exchanges: Exchanges,
 }
 
 #[tokio::main]

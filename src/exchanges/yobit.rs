@@ -4,10 +4,7 @@ use {
     std::error::Error,
 };
 
-use crate::{
-    exchanges::{CurrencyPair, Exchange, Ticker},
-    Settings,
-};
+use crate::{prelude::*, Exchange, Settings};
 
 pub struct Yobit<'a> {
     endpoints: Vec<Endpoint<'a>>,
