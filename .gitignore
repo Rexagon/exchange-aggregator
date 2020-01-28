@@ -1,0 +1,7 @@
+/.idea
+/target
+**/*.rs.bk
+
+.env
+appsettings.json
+/src/secret.key
