@@ -1,7 +1,9 @@
 pub mod hit_btc;
+pub mod live_coin;
 pub mod yobit;
 
 pub use hit_btc::*;
+pub use live_coin::*;
 pub use yobit::*;
 
 use hashbrown::HashMap;

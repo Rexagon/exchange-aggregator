@@ -9,7 +9,7 @@ mod exchanges;
 use std::time::Duration;
 use tokio::time::{self, Instant};
 
-use crate::exchanges::{CurrencyPair, Exchange, ExchangeSettings, HitBtc, Yobit};
+use crate::exchanges::{CurrencyPair, Exchange, ExchangeSettings, HitBtc, LiveCoin, Yobit};
 
 #[derive(Debug, Deserialize)]
 pub struct Exchanges {
@@ -38,6 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let settings = settings.try_into::<Settings>()?;
 
     let mut hit_btc = HitBtc::new(&settings);
+    let mut live_coin = LiveCoin::new(&settings);
     let mut yobit: Yobit = Yobit::new(&settings);
 
     loop {
@@ -46,6 +47,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let result = hit_btc.request_tickers().await;
         println!("HitBtc: {:?}", result);
+
+        let result = live_coin.request_tickers().await;
+        println!("LiveCoin: {:?}", result);
 
         let result = yobit.request_tickers().await;
         println!("Yobit: {:?}", result);
