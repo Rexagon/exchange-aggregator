@@ -36,6 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut exchanges: Vec<(&str, Box<dyn Exchange>)> = vec![
         ("Binance", Box::new(Binance::new(&settings))),
         ("EXMO", Box::new(Exmo::new(&settings))),
+        ("gate.io", Box::new(GateIo::new(&settings))),
         ("HitBTC", Box::new(HitBtc::new(&settings))),
         ("Livecoin", Box::new(LiveCoin::new(&settings))),
         ("Polonex", Box::new(Polonex::new(&settings))),
