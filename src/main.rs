@@ -4,6 +4,9 @@ extern crate serde_derive;
 #[macro_use]
 extern crate async_trait;
 
+#[macro_use]
+extern crate log;
+
 mod aggregator;
 mod exchange;
 mod exchanges;
@@ -27,6 +30,10 @@ pub struct Settings {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    std::env::set_var("RUST_LOG", "info");
+
+    env_logger::init();
+
     let mut settings = config::Config::default();
     settings
         .merge(config::File::with_name("appsettings.json"))
@@ -45,10 +52,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     loop {
         let now = Instant::now();
-        println!("Tick");
+        info!("Tick");
 
         let result = aggregator.next().await.unwrap();
-        println!("{:?}", result);
+        info!("{:?}", result);
 
         time::delay_until(now + Duration::from_millis(1000)).await
     }

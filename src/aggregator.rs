@@ -35,7 +35,7 @@ impl Aggregator {
 }
 
 impl Stream for Aggregator {
-    type Item = HashMap<&'static str, HashMap<String, Ticker>>;
+    type Item = HashMap<String, HashMap<&'static str, Ticker>>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let deadline = Instant::now() + Duration::from_millis(900);
@@ -68,8 +68,15 @@ impl Stream for Aggregator {
                     Poll::Pending => continue,
                 };
 
-                if let Ok(tickers) = tickers {
-                    result.insert(name, tickers);
+                let tickers: HashMap<String, Ticker> = match tickers {
+                    Ok(x) => x,
+                    Err(_) => continue,
+                };
+
+                for (currency, ticker) in tickers {
+                    let currency_tickers = result.entry(currency).or_insert(HashMap::new());
+
+                    currency_tickers.insert(name, ticker);
                 }
             }
 
