@@ -2,12 +2,12 @@ use {hashbrown::HashMap, std::error::Error};
 
 use crate::{prelude::*, Exchange, Settings};
 
-pub struct GateIo<'a> {
-    pairs: CurrencyPairList<'a>,
+pub struct GateIo {
+    pairs: CurrencyPairList,
 }
 
-impl<'a> GateIo<'a> {
-    pub fn new(settings: &'a Settings) -> Self {
+impl<'a> GateIo {
+    pub fn new(settings: &Settings) -> Self {
         let pairs = CurrencyPairList::new(&settings.currency_pairs, |pair| {
             format!("{}_{}", pair.quote, pair.base).to_lowercase()
         });
@@ -17,7 +17,7 @@ impl<'a> GateIo<'a> {
 }
 
 #[async_trait]
-impl<'a> Exchange for GateIo<'a> {
+impl Exchange for GateIo {
     async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
         let mut response: HashMap<String, TickersResponseItem> =
             reqwest::get(TICKERS_ENDPOINT).await?.json().await?;

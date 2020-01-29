@@ -4,20 +4,21 @@ extern crate serde_derive;
 #[macro_use]
 extern crate async_trait;
 
+mod aggregator;
 mod exchange;
 mod exchanges;
 mod prelude;
 
+pub use aggregator::*;
 pub use exchange::*;
 
 use {
-    futures::{stream, StreamExt},
-    hashbrown::HashMap,
-    std::time::Duration,
+    std::{error::Error, time::Duration},
+    tokio::stream::StreamExt,
     tokio::time::{self, Instant},
 };
 
-use crate::{exchanges::*, prelude::*};
+use crate::{exchanges::*, prelude::*, Aggregator};
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
@@ -25,7 +26,7 @@ pub struct Settings {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), Box<dyn Error>> {
     let mut settings = config::Config::default();
     settings
         .merge(config::File::with_name("appsettings.json"))
@@ -33,45 +34,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let settings = settings.try_into::<Settings>()?;
 
-    let mut exchanges: Vec<(&str, Box<dyn Exchange>)> = vec![
-        ("Binance", Box::new(Binance::new(&settings))),
-        ("EXMO", Box::new(Exmo::new(&settings))),
-        ("gate.io", Box::new(GateIo::new(&settings))),
-        ("HitBTC", Box::new(HitBtc::new(&settings))),
-        ("Livecoin", Box::new(LiveCoin::new(&settings))),
-        ("Polonex", Box::new(Polonex::new(&settings))),
-        ("YoBit", Box::new(Yobit::new(&settings))),
-    ];
-    let exchange_count = exchanges.len();
+    let mut aggregator = Aggregator::new();
+    aggregator.add("Binance", Box::new(Binance::new(&settings)));
+    aggregator.add("EXMO", Box::new(Exmo::new(&settings)));
+    aggregator.add("gate.io", Box::new(GateIo::new(&settings)));
+    aggregator.add("HitBTC", Box::new(HitBtc::new(&settings)));
+    aggregator.add("Livecoin", Box::new(LiveCoin::new(&settings)));
+    aggregator.add("Polonex", Box::new(Polonex::new(&settings)));
+    aggregator.add("YoBit", Box::new(Yobit::new(&settings)));
 
     loop {
         let now = Instant::now();
         println!("Tick");
 
-        let tickers = stream::iter(exchanges.iter_mut().map(|(name, exchange)| {
-            async move {
-                let tickers = exchange.request_tickers().await;
-                tickers.map(|data| (*name, data))
-            }
-        }))
-        .fold(
-            Vec::<(&str, HashMap<String, Ticker>)>::with_capacity(exchange_count),
-            |mut result, fut| {
-                async {
-                    result.extend(fut.await);
-                    result
-                }
-            },
-        )
-        .await;
-
-        let mut result = HashMap::new();
-        for (name, tickers) in tickers {
-            result.insert(name, tickers);
-        }
-
+        let result = aggregator.next().await.unwrap();
         println!("{:?}", result);
 
-        time::delay_until(now + Duration::from_secs(1)).await
+        time::delay_until(now + Duration::from_millis(1000)).await
     }
 }

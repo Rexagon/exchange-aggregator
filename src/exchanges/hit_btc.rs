@@ -2,12 +2,12 @@ use {hashbrown::HashMap, std::error::Error};
 
 use crate::{prelude::*, Exchange, Settings};
 
-pub struct HitBtc<'a> {
-    pairs: CurrencyPairList<'a>,
+pub struct HitBtc {
+    pairs: CurrencyPairList,
 }
 
-impl<'a> HitBtc<'a> {
-    pub fn new(settings: &'a Settings) -> Self {
+impl HitBtc {
+    pub fn new(settings: &Settings) -> Self {
         let pairs = CurrencyPairList::new(&settings.currency_pairs, |pair| {
             format!("{}{}", pair.quote, pair.base).to_uppercase()
         });
@@ -17,7 +17,7 @@ impl<'a> HitBtc<'a> {
 }
 
 #[async_trait]
-impl<'a> Exchange for HitBtc<'a> {
+impl Exchange for HitBtc {
     async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
         let response: Vec<TickersResponseItem> =
             reqwest::get(TICKERS_ENDPOINT).await?.json().await?;

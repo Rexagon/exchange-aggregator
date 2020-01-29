@@ -6,12 +6,12 @@ use {
 
 use crate::{prelude::*, Exchange, Settings};
 
-pub struct Yobit<'a> {
-    endpoints: Vec<Endpoint<'a>>,
+pub struct Yobit {
+    endpoints: Vec<Endpoint>,
 }
 
-impl<'a> Yobit<'a> {
-    pub fn new(settings: &'a Settings) -> Self {
+impl Yobit {
+    pub fn new(settings: &Settings) -> Self {
         let endpoints = settings.currency_pairs.iter().map(Endpoint::new).collect();
 
         Yobit { endpoints }
@@ -19,7 +19,7 @@ impl<'a> Yobit<'a> {
 }
 
 #[async_trait]
-impl<'a> Exchange for Yobit<'a> {
+impl Exchange for Yobit {
     async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
         let responses: Vec<reqwest::Result<TickerResponse>> = stream::iter(
             self.endpoints
@@ -77,18 +77,18 @@ impl<'a> Exchange for Yobit<'a> {
     }
 }
 
-struct Endpoint<'a> {
-    currency_pair: &'a CurrencyPair,
+struct Endpoint {
+    currency_pair: CurrencyPair,
     url: String,
     is_active: bool,
 }
 
-impl<'a> Endpoint<'a> {
-    fn new(currency_pair: &'a CurrencyPair) -> Self {
+impl Endpoint {
+    fn new(currency_pair: &CurrencyPair) -> Self {
         let symbol = format!("{}_{}", currency_pair.quote, currency_pair.base).to_lowercase();
 
         Endpoint {
-            currency_pair,
+            currency_pair: currency_pair.clone(),
             url: format!("{}/{}/ticker", TICKER_BASE_ENDPOINT, symbol),
             is_active: true,
         }

@@ -7,7 +7,7 @@ pub struct Ticker {
     pub last: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CurrencyPair {
     pub base: String,
     pub quote: String,
@@ -19,12 +19,12 @@ impl ToString for CurrencyPair {
     }
 }
 
-pub struct CurrencyPairList<'a> {
-    pub items: HashMap<String, CurrencyPairListItem<'a>>,
+pub struct CurrencyPairList {
+    pub items: HashMap<String, CurrencyPairListItem>,
 }
 
-impl<'a> CurrencyPairList<'a> {
-    pub fn new<F>(currency_pairs: &'a Vec<CurrencyPair>, symbol_predicate: F) -> Self
+impl CurrencyPairList {
+    pub fn new<F>(currency_pairs: &Vec<CurrencyPair>, symbol_predicate: F) -> Self
     where
         F: Fn(&CurrencyPair) -> String,
     {
@@ -34,7 +34,7 @@ impl<'a> CurrencyPairList<'a> {
                 (
                     symbol_predicate(pair),
                     CurrencyPairListItem {
-                        pair,
+                        pair: pair.clone(),
                         is_active: true,
                     },
                 )
@@ -45,11 +45,11 @@ impl<'a> CurrencyPairList<'a> {
     }
 
     pub fn find(&self, symbol: &String) -> Option<&CurrencyPair> {
-        self.items.get(symbol).map(|item| item.pair)
+        self.items.get(symbol).map(|item| &item.pair)
     }
 }
 
-pub struct CurrencyPairListItem<'a> {
-    pub pair: &'a CurrencyPair,
+pub struct CurrencyPairListItem {
+    pub pair: CurrencyPair,
     pub is_active: bool,
 }

@@ -2,12 +2,12 @@ use {futures::TryFutureExt, hashbrown::HashMap, std::error::Error};
 
 use crate::{prelude::*, Exchange, Settings};
 
-pub struct Binance<'a> {
-    pairs: CurrencyPairList<'a>,
+pub struct Binance {
+    pairs: CurrencyPairList,
 }
 
-impl<'a> Binance<'a> {
-    pub fn new(settings: &'a Settings) -> Self {
+impl Binance {
+    pub fn new(settings: &Settings) -> Self {
         let pairs = CurrencyPairList::new(&settings.currency_pairs, |pair| {
             format!("{}{}", pair.quote, pair.base).to_uppercase()
         });
@@ -17,7 +17,7 @@ impl<'a> Binance<'a> {
 }
 
 #[async_trait]
-impl<'a> Exchange for Binance<'a> {
+impl Exchange for Binance {
     async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
         let (orders_response, prices_response): (
             reqwest::Result<Vec<BookTickerItem>>,
