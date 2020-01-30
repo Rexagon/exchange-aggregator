@@ -25,6 +25,7 @@ use crate::{exchanges::*, prelude::*, Aggregator};
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
+    pub publish_endpoint: String,
     pub currency_pairs: Vec<CurrencyPair>,
 }
 
@@ -36,8 +37,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let mut settings = config::Config::default();
     settings
-        .merge(config::File::with_name("appsettings.json"))
-        .expect("Unable to read appsettings.json");
+        .merge(config::File::with_name("settings.json"))
+        .expect("Unable to read settings.json");
 
     let settings = settings.try_into::<Settings>()?;
 
@@ -56,6 +57,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         let result = aggregator.next().await.unwrap();
         info!("{:?}", result);
+
+        let client = reqwest::Client::new();
+        let response = client
+            .post(&settings.publish_endpoint)
+            .json(&result)
+            .send()
+            .await;
+
+        if let Err(response) = response {
+            error!("Unable to publish: {:?}", response);
+        }
 
         time::delay_until(now + Duration::from_millis(1000)).await
     }

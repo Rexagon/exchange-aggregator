@@ -3,5 +3,5 @@
 **/*.rs.bk
 
 .env
-appsettings.json
+settings.json
 /src/secret.key

@@ -1,0 +1,9 @@
+{
+  "publish_endpoint": "http://127.0.0.1/app/notify",
+  "currency_pairs": [
+    {
+      "base": "USDT",
+      "quote": "BTC"
+    }
+  ]
+}
