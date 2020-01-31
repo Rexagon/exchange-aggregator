@@ -47,7 +47,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     aggregator.add("HitBTC", Box::new(HitBtc::new(&settings)));
     aggregator.add("Livecoin", Box::new(LiveCoin::new(&settings)));
     aggregator.add("Polonex", Box::new(Polonex::new(&settings)));
-    aggregator.add("YoBit", Box::new(Yobit::new(&settings)));
+    //aggregator.add("YoBit", Box::new(Yobit::new(&settings)));
 
     loop {
         let now = Instant::now();
