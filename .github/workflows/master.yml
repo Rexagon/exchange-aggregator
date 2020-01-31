@@ -10,3 +10,8 @@ jobs:
       - uses: actions/checkout@v1
       - name: Build
         run: cargo build --release --verbose
+      - name: Upload binary
+        uses: actions/upload-artifact@v1
+        with:
+          name: exchange-aggregator
+          path: target/release/exchange-aggregator
