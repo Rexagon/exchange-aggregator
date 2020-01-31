@@ -33,8 +33,8 @@ impl Exchange for Exmo {
             result.insert(
                 item.pair.to_string(),
                 Ticker {
-                    ask: ticker.buy_price.take(),
-                    bid: ticker.sell_price.take(),
+                    ask: ticker.sell_price.take(),
+                    bid: ticker.buy_price.take(),
                     last: ticker.last_trade.take(),
                 },
             );
