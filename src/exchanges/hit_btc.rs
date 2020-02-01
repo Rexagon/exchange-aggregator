@@ -6,18 +6,16 @@ pub struct HitBtc {
     pairs: CurrencyPairList,
 }
 
-impl HitBtc {
-    pub fn new(settings: &Settings) -> Self {
+#[async_trait]
+impl Exchange for HitBtc {
+    fn new(settings: &Settings) -> Self {
         let pairs = CurrencyPairList::new(&settings.currency_pairs, |pair| {
             format!("{}{}", pair.quote, pair.base).to_uppercase()
         });
 
         HitBtc { pairs }
     }
-}
 
-#[async_trait]
-impl Exchange for HitBtc {
     async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
         let response: Vec<TickersResponseItem> =
             reqwest::get(TICKERS_ENDPOINT).await?.json().await?;

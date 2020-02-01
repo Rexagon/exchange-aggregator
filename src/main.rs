@@ -12,20 +12,21 @@ mod exchange;
 mod exchanges;
 mod prelude;
 
-pub use aggregator::*;
 pub use exchange::*;
 
 use {
+    hashbrown::HashMap,
     std::{error::Error, time::Duration},
     tokio::stream::StreamExt,
     tokio::time::{self, Instant},
 };
 
-use crate::{exchanges::*, prelude::*, Aggregator};
+use crate::{aggregator::Aggregator, exchanges::*, prelude::*};
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub publish_endpoint: String,
+    pub exchanges: Option<HashMap<String, bool>>,
     pub currency_pairs: Vec<CurrencyPair>,
 }
 
@@ -41,13 +42,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let settings = settings.try_into::<Settings>()?;
 
     let mut aggregator = Aggregator::new();
-    aggregator.add("Binance", Box::new(Binance::new(&settings)));
-    aggregator.add("EXMO", Box::new(Exmo::new(&settings)));
-    aggregator.add("gate.io", Box::new(GateIo::new(&settings)));
-    aggregator.add("HitBTC", Box::new(HitBtc::new(&settings)));
-    aggregator.add("Livecoin", Box::new(LiveCoin::new(&settings)));
-    aggregator.add("Polonex", Box::new(Polonex::new(&settings)));
-    //aggregator.add("YoBit", Box::new(Yobit::new(&settings)));
+    aggregator.try_create::<Binance>("Binance", &settings);
+    aggregator.try_create::<Exmo>("EXMO", &settings);
+    aggregator.try_create::<GateIo>("gate.io", &settings);
+    aggregator.try_create::<HitBtc>("HitBTC", &settings);
+    aggregator.try_create::<LiveCoin>("Livecoin", &settings);
+    aggregator.try_create::<Polonex>("Polonex", &settings);
+    aggregator.try_create::<Yobit>("YoBit", &settings);
 
     loop {
         let now = Instant::now();

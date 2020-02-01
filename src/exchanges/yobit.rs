@@ -8,8 +8,9 @@ pub struct Yobit {
     current_endpoint: usize,
 }
 
-impl Yobit {
-    pub fn new(settings: &Settings) -> Self {
+#[async_trait]
+impl Exchange for Yobit {
+    fn new(settings: &Settings) -> Self {
         let pairs = CurrencyPairList::new(&settings.currency_pairs, |pair| {
             format!("{}_{}", pair.quote, pair.base).to_lowercase()
         });
@@ -41,10 +42,7 @@ impl Yobit {
             current_endpoint: 0,
         }
     }
-}
 
-#[async_trait]
-impl Exchange for Yobit {
     async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
         let endpoint = &self.endpoints[self.current_endpoint];
         self.current_endpoint = (self.current_endpoint + 1) % self.endpoints.len();

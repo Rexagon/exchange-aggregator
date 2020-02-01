@@ -6,18 +6,16 @@ pub struct Binance {
     pairs: CurrencyPairList,
 }
 
-impl Binance {
-    pub fn new(settings: &Settings) -> Self {
+#[async_trait]
+impl Exchange for Binance {
+    fn new(settings: &Settings) -> Self {
         let pairs = CurrencyPairList::new(&settings.currency_pairs, |pair| {
             format!("{}{}", pair.quote, pair.base).to_uppercase()
         });
 
         Binance { pairs }
     }
-}
 
-#[async_trait]
-impl Exchange for Binance {
     async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
         let (orders_response, prices_response): (
             reqwest::Result<Vec<BookTickerItem>>,

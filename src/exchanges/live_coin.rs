@@ -6,18 +6,16 @@ pub struct LiveCoin {
     pairs: CurrencyPairList,
 }
 
-impl LiveCoin {
-    pub fn new(settings: &Settings) -> Self {
+#[async_trait]
+impl Exchange for LiveCoin {
+    fn new(settings: &Settings) -> Self {
         let pairs = CurrencyPairList::new(&settings.currency_pairs, |pair| {
             format!("{}/{}", pair.quote, pair.base).to_uppercase()
         });
 
         LiveCoin { pairs }
     }
-}
 
-#[async_trait]
-impl Exchange for LiveCoin {
     async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
         let response: Vec<TickersResponseItem> =
             reqwest::get(TICKERS_ENDPOINT).await?.json().await?;

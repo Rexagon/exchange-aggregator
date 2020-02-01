@@ -8,7 +8,7 @@ use {
     tokio::time::Instant,
 };
 
-use crate::{prelude::*, Exchange};
+use crate::{prelude::*, Exchange, Settings};
 
 type TickersResult = Result<HashMap<String, Ticker>, Box<dyn Error>>;
 type ExchangeFuture = dyn Future<Output = (&'static str, Box<dyn Exchange>, TickersResult)>;
@@ -22,6 +22,21 @@ impl Aggregator {
         Aggregator {
             futures: Vec::new(),
         }
+    }
+
+    pub fn try_create<T>(&mut self, name: &'static str, settings: &Settings)
+    where
+        T: Exchange + 'static,
+    {
+        if let Some(exchanges) = &settings.exchanges {
+            if let Some(false) = exchanges.get(&name.to_lowercase()) {
+                return;
+            }
+        }
+
+        info!("Enable receiver: {}", name);
+
+        self.add(name, Box::new(T::new(settings)));
     }
 
     pub fn add(&mut self, name: &'static str, mut exchange: Box<dyn Exchange>) {

@@ -1,5 +1,8 @@
 {
   "publish_endpoint": "http://127.0.0.1/app/notify",
+  "exchanges": {
+    "some": false
+  }
   "currency_pairs": [
     {
       "base": "USDT",

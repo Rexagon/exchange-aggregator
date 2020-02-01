@@ -6,18 +6,16 @@ pub struct Exmo {
     pairs: CurrencyPairList,
 }
 
-impl Exmo {
-    pub fn new(settings: &Settings) -> Self {
+#[async_trait]
+impl Exchange for Exmo {
+    fn new(settings: &Settings) -> Self {
         let pairs = CurrencyPairList::new(&settings.currency_pairs, |pair| {
             format!("{}_{}", pair.quote, pair.base).to_uppercase()
         });
 
         Exmo { pairs }
     }
-}
 
-#[async_trait]
-impl Exchange for Exmo {
     async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
         let mut response: HashMap<String, TickersResponseItem> =
             reqwest::get(TICKERS_ENDPOINT).await?.json().await?;
