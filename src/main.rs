@@ -47,6 +47,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     aggregator.try_create::<GateIo>("gate.io", &settings);
     aggregator.try_create::<HitBtc>("HitBTC", &settings);
     aggregator.try_create::<LiveCoin>("Livecoin", &settings);
+    aggregator.try_create::<P2pb2b>("p2pb2b", &settings);
     aggregator.try_create::<Polonex>("Polonex", &settings);
     aggregator.try_create::<Yobit>("YoBit", &settings);
 
