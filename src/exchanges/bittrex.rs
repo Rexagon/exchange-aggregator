@@ -17,11 +17,11 @@ impl Exchange for Bittrex {
     }
 
     async fn request_tickers(&mut self) -> Result<HashMap<String, Ticker>, Box<dyn Error>> {
-        let mut response: ApiResponse = reqwest::get(TICKERS_ENDPOINT).await?.json().await?;
+        let response: ApiResponse = reqwest::get(TICKERS_ENDPOINT).await?.json().await?;
 
         let mut result = HashMap::new();
 
-        for mut ticker in response.result {
+        for ticker in response.result {
             let pair = match self.pairs.find(&ticker.market_name) {
                 Some(pair) => pair,
                 None => continue,

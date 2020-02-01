@@ -15,9 +15,9 @@ mod prelude;
 pub use exchange::*;
 
 use {
+    futures::stream::StreamExt,
     hashbrown::HashMap,
     std::{error::Error, time::Duration},
-    tokio::stream::StreamExt,
     tokio::time::{self, Instant},
 };
 
@@ -43,6 +43,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let mut aggregator = Aggregator::new();
     aggregator.try_create::<Binance>("Binance", &settings);
+    aggregator.try_create::<Bitfinex>("Bitfinex", &settings);
     aggregator.try_create::<Bittrex>("Bittrex", &settings);
     aggregator.try_create::<Exmo>("EXMO", &settings);
     aggregator.try_create::<GateIo>("gate.io", &settings);

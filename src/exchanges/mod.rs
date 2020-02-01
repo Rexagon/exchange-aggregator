@@ -1,4 +1,5 @@
 pub mod binance;
+pub mod bitfinex;
 pub mod bittrex;
 pub mod exmo;
 pub mod gate_io;
@@ -10,6 +11,7 @@ pub mod polonex;
 pub mod yobit;
 
 pub use binance::*;
+pub use bitfinex::*;
 pub use bittrex::*;
 pub use exmo::*;
 pub use gate_io::*;

@@ -85,7 +85,10 @@ impl Stream for Aggregator {
 
                 let tickers: HashMap<String, Ticker> = match tickers {
                     Ok(x) => x,
-                    Err(_) => continue,
+                    Err(e) => {
+                        error!("{:?}", e);
+                        continue;
+                    }
                 };
 
                 for (currency, ticker) in tickers {
